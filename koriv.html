@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Koriv — Radiation Compliance, Automated</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080D1A;--surface:#0E1628;--surface-r:#141F35;
+  --amber:#F0B429;--amber-d:rgba(240,180,41,0.12);--amber-b:rgba(240,180,41,0.2);
+  --teal:#00D4B8;--teal-d:rgba(0,212,184,0.10);
+  --danger:#E05252;--success:#3ECF8E;
+  --txt:#E8EDF7;--txt2:#7A8BA8;--txt3:#3D4F6B;
+  --bdr:rgba(255,255,255,0.05);--bdr-a:rgba(240,180,41,0.18);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.6;overflow-x:hidden}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:rgba(240,180,41,0.3);border-radius:2px}
+
+/* ─── NAV ─── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 52px;height:66px;background:rgba(8,13,26,0.75);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid transparent;transition:border-color .4s,background .4s}
+nav.scrolled{border-bottom-color:var(--bdr-a);background:rgba(8,13,26,0.92)}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:var(--txt);text-decoration:none;letter-spacing:-.5px;display:flex;align-items:center;gap:5px}
+.logo-pulse{width:7px;height:7px;background:var(--amber);border-radius:50%;animation:lpulse 3s ease-in-out infinite;box-shadow:0 0 8px rgba(240,180,41,0.6)}
+@keyframes lpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.55)}}
+.nav-links{display:flex;gap:34px;list-style:none}
+.nav-links a{color:var(--txt2);text-decoration:none;font-size:14px;font-weight:400;letter-spacing:.02em;transition:color .2s}
+.nav-links a:hover{color:var(--txt)}
+.nav-r{display:flex;align-items:center;gap:18px}
+.nav-login{color:var(--txt2);text-decoration:none;font-size:14px;transition:color .2s}
+.nav-login:hover{color:var(--txt)}
+.btn-a{background:var(--amber);color:#080D1A;border:none;padding:9px 20px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;transition:all .2s;box-shadow:0 0 24px rgba(240,180,41,0.28)}
+.btn-a:hover{box-shadow:0 0 40px rgba(240,180,41,0.5);transform:translateY(-1px)}
+
+/* ─── HERO ─── */
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;padding:110px 52px 90px;overflow:hidden}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(240,180,41,0.028) 1px,transparent 1px),linear-gradient(90deg,rgba(240,180,41,0.028) 1px,transparent 1px);background-size:52px 52px;pointer-events:none}
+.hero-trefoil{position:absolute;right:-60px;top:50%;transform:translateY(-50%) rotate(12deg);font-size:520px;color:rgba(240,180,41,0.022);pointer-events:none;user-select:none;line-height:1;z-index:0}
+.hero-radial{position:absolute;top:40%;left:32%;transform:translate(-50%,-50%);width:900px;height:900px;background:radial-gradient(circle,rgba(240,180,41,0.055) 0%,transparent 65%);pointer-events:none;z-index:0}
+.pulse-wrap{position:absolute;top:48%;left:30%;transform:translate(-50%,-50%);pointer-events:none;z-index:0}
+.p-ring{position:absolute;border-radius:50%;border:1px solid rgba(240,180,41,.22);top:50%;left:50%;transform:translate(-50%,-50%) scale(0);animation:pring 7s ease-out infinite}
+.p-ring:nth-child(2){animation-delay:2.3s}.p-ring:nth-child(3){animation-delay:4.6s}
+@keyframes pring{0%{width:50px;height:50px;opacity:.75;transform:translate(-50%,-50%) scale(1)}100%{width:50px;height:50px;opacity:0;transform:translate(-50%,-50%) scale(32)}}
+.hero-inner{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center;max-width:1280px;margin:0 auto;width:100%}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(0,212,184,.07);border:1px solid rgba(0,212,184,.22);border-radius:4px;padding:5px 13px;margin-bottom:28px}
+.ey-dot{width:5px;height:5px;background:var(--teal);border-radius:50%}
+.hero-eyebrow span{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:500;color:var(--teal);letter-spacing:.14em;text-transform:uppercase}
+h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(38px,4.8vw,62px);line-height:1.06;letter-spacing:-1.8px;color:var(--txt);margin-bottom:22px}
+h1 em{font-style:normal;color:var(--amber)}
+.hero-sub{font-size:17px;color:var(--txt2);line-height:1.7;max-width:490px;margin-bottom:38px;font-weight:300}
+.hero-ctas{display:flex;align-items:center;gap:14px;margin-bottom:38px}
+.btn-hero{background:var(--amber);color:#080D1A;border:none;padding:14px 28px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:all .25s;box-shadow:0 0 36px rgba(240,180,41,0.35)}
+.btn-hero:hover{box-shadow:0 0 60px rgba(240,180,41,.55);transform:translateY(-2px)}
+.btn-ghost{background:transparent;color:var(--txt2);border:1px solid var(--bdr);padding:14px 24px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;text-decoration:none;transition:all .2s}
+.btn-ghost:hover{color:var(--txt);border-color:rgba(255,255,255,.15)}
+.hero-trust{display:flex;gap:22px;flex-wrap:wrap}
+.t-item{display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--txt3);letter-spacing:.04em}
+.t-check{color:var(--teal);font-size:12px}
+
+/* ─── DOSIMETER WIDGET ─── */
+.hero-right{position:relative;height:420px}
+.dosi-widget{position:absolute;top:10px;right:0;width:255px;background:var(--surface);border:1px solid var(--bdr-a);border-radius:10px;padding:20px;box-shadow:0 0 50px rgba(240,180,41,0.07),inset 0 1px 0 rgba(255,255,255,.04)}
+.w-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;color:var(--txt3);letter-spacing:.16em;text-transform:uppercase;margin-bottom:3px}
+.w-div{height:1px;background:var(--bdr);margin:12px 0}
+.dose-row{display:flex;align-items:baseline;gap:6px;margin-bottom:10px}
+#dose-val{font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:300;color:var(--amber);letter-spacing:-1.5px;transition:all .6s ease}
+.dose-unit{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--txt2)}
+.dose-status{display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--success);letter-spacing:.07em;margin-bottom:14px}
+.s-blink{width:6px;height:6px;background:var(--success);border-radius:50%;animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+.dose-bar-wrap{display:flex;flex-direction:column;gap:5px}
+.dose-bar-lbls{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--txt3)}
+.dose-bar{height:3px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden}
+.dose-bar-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--amber));border-radius:2px;width:18%;transition:width 1.2s ease}
+
+/* floating card */
+.float-card{position:absolute;bottom:30px;left:-30px;width:275px;background:var(--surface);border:1px solid var(--bdr);border-left:3px solid var(--amber);border-radius:8px;padding:16px 18px;box-shadow:0 24px 64px rgba(0,0,0,.45);animation:fcfloat 5s ease-in-out infinite}
+@keyframes fcfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+.fc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.fc-title{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:500;color:var(--txt2);letter-spacing:.1em;text-transform:uppercase}
+.fc-badge{background:rgba(224,82,82,.13);border:1px solid rgba(224,82,82,.3);color:var(--danger);font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 8px;border-radius:3px;letter-spacing:.07em}
+.fc-body{font-size:13px;color:var(--txt);font-weight:400;line-height:1.45}
+.fc-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--amber);margin-top:8px}
+
+/* ─── WAVEFORM ─── */
+.wave-div{width:100%;height:32px;overflow:hidden;opacity:.35;line-height:0}
+.wave-div svg{width:100%;height:32px}
+
+/* ─── SOCIAL PROOF ─── */
+.sp-bar{padding:36px 52px;background:var(--surface);border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr)}
+.sp-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;gap:48px;flex-wrap:wrap}
+.sp-label{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--txt3);letter-spacing:.07em;white-space:nowrap;flex-shrink:0}
+.sp-items{display:flex;gap:36px;flex-wrap:wrap}
+.sp-item{display:flex;align-items:center;gap:10px;color:var(--txt2);font-size:13px}
+.sp-icon{font-size:18px;opacity:.45}
+
+/* ─── SECTION BASE ─── */
+section{padding:100px 52px}
+.sec-in{max-width:1280px;margin:0 auto}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--teal);letter-spacing:.16em;text-transform:uppercase;margin-bottom:14px}
+.s-head{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(30px,3.8vw,46px);line-height:1.1;letter-spacing:-1px;color:var(--txt);margin-bottom:14px}
+.s-sub{font-size:16px;color:var(--txt2);line-height:1.65;font-weight:300;max-width:560px}
+
+/* ─── PROBLEM ─── */
+.prob-sec{background:var(--bg)}
+.inc-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:60px}
+.inc-card{background:var(--surface);border:1px solid var(--bdr);border-radius:8px;padding:28px;position:relative;overflow:hidden;opacity:0;transform:translateY(28px);transition:opacity .6s ease,transform .6s ease,border-color .25s,box-shadow .25s}
+.inc-card.vis{opacity:1;transform:translateY(0)}
+.inc-card:hover{border-color:var(--bdr-a);transform:translateY(-4px) !important;box-shadow:0 20px 48px rgba(0,0,0,.35)}
+.inc-card:nth-child(2){transition-delay:.12s}
+.inc-card:nth-child(3){transition-delay:.24s}
+.inc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--bdr)}
+.inc-type{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--txt3);letter-spacing:.14em;text-transform:uppercase}
+.inc-stamp{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;padding:3px 10px;border-radius:3px;letter-spacing:.1em;border:1.5px solid;opacity:0;transform:scale(1.4) rotate(-4deg);transition:all .45s cubic-bezier(.34,1.56,.64,1)}
+.stamp-r{color:var(--danger);border-color:var(--danger);background:rgba(224,82,82,.09)}
+.stamp-a{color:var(--amber);border-color:var(--amber);background:rgba(240,180,41,.09)}
+.stamp-t{color:var(--teal);border-color:var(--teal);background:rgba(0,212,184,.09)}
+.inc-card.stamped .inc-stamp{opacity:1;transform:scale(1) rotate(-3deg)}
+.inc-title{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--txt);margin-bottom:10px}
+.inc-desc{font-size:14px;color:var(--txt2);line-height:1.6;margin-bottom:16px;font-weight:300}
+.inc-out{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--txt3);padding:10px 12px;background:rgba(0,0,0,.3);border-radius:4px;border-left:2px solid var(--bdr);line-height:1.55}
+.inc-out strong{color:var(--danger)}
+.prob-close{text-align:center;margin-top:56px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--txt3);font-style:italic}
+.prob-close em{color:var(--txt2);font-style:normal}
+
+/* ─── PRODUCT TABS ─── */
+.prod-sec{background:var(--surface)}
+.tab-nav{display:flex;gap:0;border-bottom:1px solid var(--bdr);margin-bottom:48px}
+.tab-btn{background:none;border:none;padding:14px 28px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:400;color:var(--txt3);cursor:pointer;position:relative;transition:color .2s;letter-spacing:.01em}
+.tab-btn::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--amber);transform:scaleX(0);transition:transform .25s cubic-bezier(.4,0,.2,1)}
+.tab-btn.active{color:var(--txt)}.tab-btn.active::after{transform:scaleX(1)}
+.tab-panel{display:none;animation:fin .35s ease}
+.tab-panel.active{display:grid;grid-template-columns:1fr 1.3fr;gap:60px;align-items:center}
+@keyframes fin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.tab-info h3{font-family:'Syne',sans-serif;font-weight:700;font-size:24px;color:var(--txt);margin-bottom:14px}
+.tab-info p{font-size:14.5px;color:var(--txt2);line-height:1.7;margin-bottom:22px;font-weight:300}
+.tab-feats{list-style:none;display:flex;flex-direction:column;gap:10px}
+.tab-feats li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--txt2)}
+.tab-feats li::before{content:'→';color:var(--amber);font-size:13px;margin-top:1px;flex-shrink:0}
+
+/* Mockup shell */
+.mock{background:#060B16;border:1px solid var(--bdr);border-radius:10px;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.55)}
+.mock-bar{background:var(--surface);padding:10px 16px;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--bdr)}
+.m-dot{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.08)}
+.m-t{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--txt3);margin-left:10px;letter-spacing:.05em}
+.mock-body{padding:20px}
+
+/* dose monitor mockup */
+.mk-thead{display:grid;grid-template-columns:1fr 110px 90px 60px;gap:8px;padding:5px 10px;margin-bottom:4px}
+.mk-thead span{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase}
+.w-row{display:grid;grid-template-columns:1fr 110px 90px 60px;gap:8px;padding:9px 10px;border-radius:5px;margin-bottom:5px;background:rgba(255,255,255,.02);align-items:center;border-left:2px solid transparent;transition:background .2s}
+.w-row.ww{border-left-color:var(--amber)}.w-row.wd{border-left-color:var(--danger)}
+.w-row:hover{background:rgba(255,255,255,.04)}
+.wn{font-size:12px;color:var(--txt)}.wid{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--txt3)}
+.bar-wrap{display:flex;align-items:center;gap:7px}
+.mini-bar{flex:1;height:3px;background:rgba(255,255,255,.05);border-radius:2px}
+.mini-fill{height:100%;border-radius:2px}
+.bf-t{background:var(--teal)}.bf-a{background:var(--amber)}.bf-d{background:var(--danger)}
+.wpct{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--txt2)}
+.sdot{width:6px;height:6px;border-radius:50%}.sd-t{background:var(--teal)}.sd-a{background:var(--amber);animation:blink 1.5s infinite}
+.wflag{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--amber)}
+
+/* report mockup */
+.rpt-body{padding:24px}
+#rpt-bar-fill{width:0%;height:100%;background:linear-gradient(90deg,var(--teal),var(--amber));border-radius:2px;transition:width 2s ease}
+.rpt-outer{height:3px;background:rgba(255,255,255,.05);border-radius:2px;margin-bottom:18px;overflow:hidden}
+.rpt-lbl{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--txt3);margin-bottom:7px}
+.rpt-preview{background:rgba(255,255,255,.03);border:1px solid var(--bdr);border-radius:6px;padding:16px}
+.rpt-hdr{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--teal);letter-spacing:.1em;margin-bottom:12px}
+.rpt-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px}
+.rpt-cell{background:rgba(255,255,255,.04);border-radius:3px;height:10px}.rpt-w{grid-column:span 2}
+.rpt-ts{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--success);margin-top:12px}
+
+/* audit mockup */
+.audit-body{padding:20px}
+.audit-typerow{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.audit-lbl2{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--txt3);width:90px;flex-shrink:0}
+.audit-val{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--amber)}
+.audit-div{height:1px;background:var(--bdr);margin:14px 0}
+.audit-log{display:flex;flex-direction:column;gap:9px}
+.a-line{display:flex;align-items:center;gap:12px;font-family:'JetBrains Mono',monospace;font-size:10px;opacity:0;transform:translateX(-6px);transition:all .3s ease}
+.a-line.vis2{opacity:1;transform:translateX(0)}
+.a-chk{flex:1;color:var(--txt2)}.a-ok{color:var(--success)}.a-warn{color:var(--amber)}
+.audit-result-box{margin-top:14px;background:rgba(224,82,82,.06);border:1px solid rgba(224,82,82,.2);border-radius:5px;padding:12px;display:none}
+.audit-result-box.vis2{display:block}
+.arb-hdr{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--danger);letter-spacing:.1em;margin-bottom:10px;display:flex;justify-content:space-between}
+.arb-item{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--txt2);margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--bdr);line-height:1.5}
+.arb-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.arb-item strong{color:var(--txt);display:block;margin-bottom:2px}
+
+/* ─── HOW IT WORKS ─── */
+.hiw-sec{background:var(--bg)}
+.hiw-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:64px;position:relative}
+.hiw-line{position:absolute;top:22px;left:calc(16.6% + 18px);right:calc(16.6% + 18px);height:1px;background:linear-gradient(90deg,var(--amber),var(--teal));z-index:0;opacity:.4}
+.hiw-step{padding:0 40px;z-index:1;position:relative}
+.hiw-step:first-child{padding-left:0}.hiw-step:last-child{padding-right:0}
+.hiw-num-wrap{display:flex;align-items:center;gap:0;margin-bottom:24px}
+.hiw-circle{width:44px;height:44px;border-radius:50%;background:var(--surface);border:1px solid var(--bdr-a);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--amber);flex-shrink:0}
+.hiw-title{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--txt);margin-bottom:10px}
+.hiw-desc{font-size:14px;color:var(--txt2);line-height:1.65;font-weight:300}
+
+/* ─── WOW MOMENT ─── */
+.wow-sec{background:var(--surface);position:relative;overflow:hidden}
+.wow-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:700px;height:700px;background:radial-gradient(circle,rgba(240,180,41,0.07) 0%,transparent 70%);pointer-events:none}
+.wow-in{max-width:900px;margin:0 auto;position:relative;z-index:1;text-align:center}
+.wow-q{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(26px,3.8vw,46px);letter-spacing:-1px;color:var(--txt);margin-bottom:48px;line-height:1.12}
+.wow-q em{color:var(--amber);font-style:normal}
+.terminal{background:#030710;border:1px solid var(--bdr-a);border-radius:10px;overflow:hidden;text-align:left;box-shadow:0 0 80px rgba(240,180,41,0.055),0 48px 90px rgba(0,0,0,.65)}
+.t-bar{background:var(--surface);padding:10px 16px;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--bdr)}
+.t-bar-title{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--txt3);margin:0 auto;letter-spacing:.1em}
+.t-body{padding:26px}
+.t-input-section{margin-bottom:18px}
+.t-row{display:flex;gap:12px;align-items:baseline;margin-bottom:7px}
+.t-lbl{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--txt3);width:130px;flex-shrink:0}
+.t-val{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--amber)}
+.t-div{height:1px;background:var(--bdr);margin:18px 0}
+.scan-log{display:flex;flex-direction:column;gap:9px}
+.sl{display:flex;align-items:center;gap:14px;font-family:'JetBrains Mono',monospace;font-size:10.5px;opacity:0;transform:translateX(-8px);transition:all .3s ease}
+.sl.sv{opacity:1;transform:translateX(0)}
+.sl-chk{flex:1;color:var(--txt2)}.sl-ok{color:var(--success)}.sl-w{color:var(--amber)}
+.scan-results{margin-top:18px;background:rgba(240,180,41,.04);border:1px solid rgba(240,180,41,.18);border-radius:7px;padding:18px;display:none;animation:fin .4s ease}
+.scan-results.sv{display:block}
+.sr-hdr{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--amber);letter-spacing:.1em;margin-bottom:14px;display:flex;justify-content:space-between}
+.sr-item{display:flex;gap:12px;margin-bottom:12px;font-family:'JetBrains Mono',monospace;font-size:10.5px;line-height:1.55;padding-bottom:12px;border-bottom:1px solid var(--bdr)}
+.sr-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.sri-icon{color:var(--amber)}.sri-txt{color:var(--txt2)}.sri-txt strong{color:var(--txt);display:block;margin-bottom:2px}
+.scan-btn-wrap{margin-top:22px;display:flex;justify-content:center}
+.scan-btn{background:rgba(240,180,41,.09);border:1px solid rgba(240,180,41,.28);color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:11px;padding:10px 28px;border-radius:5px;cursor:pointer;transition:all .2s;letter-spacing:.06em}
+.scan-btn:hover{background:rgba(240,180,41,.15);border-color:rgba(240,180,41,.45)}
+.scan-btn:disabled{opacity:.4;cursor:not-allowed}
+.wow-test{margin-top:40px;text-align:center}
+.wow-test p{font-size:15px;color:var(--txt2);font-style:italic;line-height:1.65;max-width:540px;margin:0 auto 8px}
+.wow-test cite{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--txt3);font-style:normal}
+
+/* ─── REGULATORY ─── */
+.reg-sec{background:var(--bg)}
+.reg-badges{display:flex;gap:16px;flex-wrap:wrap;margin:44px 0 40px}
+.reg-badge{background:var(--surface);border:1px solid var(--bdr);border-radius:8px;padding:18px 26px;text-align:center;cursor:default;transition:all .25s;position:relative}
+.reg-badge:hover{border-color:rgba(240,180,41,.3);background:var(--surface-r)}
+.rb-name{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:500;color:var(--txt);display:block;margin-bottom:3px}
+.rb-full{font-size:11px;color:var(--txt3)}
+.rb-tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--surface-r);border:1px solid var(--bdr-a);border-radius:6px;padding:8px 14px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s;z-index:10}
+.reg-badge:hover .rb-tip{opacity:1}
+.rb-tip span{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--amber)}
+.reg-layout{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+.reg-types{list-style:none;display:flex;flex-direction:column;gap:11px}
+.reg-types li{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--txt2)}
+.rti{width:28px;height:28px;background:rgba(0,212,184,.07);border:1px solid rgba(0,212,184,.15);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.reg-feed{background:var(--surface);border:1px solid var(--bdr);border-radius:8px;padding:20px}
+.rf-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--txt3);letter-spacing:.12em;display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.feed-dot{width:5px;height:5px;background:var(--teal);border-radius:50%;animation:blink 1.5s infinite}
+.rf-items{display:flex;flex-direction:column;gap:10px}
+.rf-item{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--txt2);padding:10px 12px;background:rgba(0,0,0,.2);border-radius:4px;border-left:2px solid rgba(0,212,184,.3);line-height:1.55}
+.rf-item strong{color:var(--teal);display:block;margin-bottom:2px}
+
+/* ─── ROI ─── */
+.roi-sec{background:var(--surface);border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr)}
+.roi-grid{display:grid;grid-template-columns:repeat(4,1fr);margin-bottom:36px}
+.roi-item{padding:44px 32px;text-align:center;border-right:1px solid var(--bdr)}
+.roi-item:last-child{border-right:none}
+.roi-num{font-family:'JetBrains Mono',monospace;font-size:clamp(28px,3.5vw,50px);font-weight:300;color:var(--amber);display:block;line-height:1;margin-bottom:10px}
+.roi-lbl{font-size:13px;color:var(--txt2);font-weight:300;line-height:1.5}
+.roi-foot{text-align:center;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--txt3);font-style:italic}
+
+/* ─── WHO ─── */
+.who-sec{background:var(--bg)}
+.who-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:60px}
+.who-card{background:var(--surface);border:1px solid var(--bdr);border-top:3px solid var(--amber);border-radius:8px;padding:32px;transition:all .25s}
+.who-card:nth-child(2){border-top-color:var(--teal)}
+.who-card:nth-child(3){border-top-color:rgba(240,180,41,.5)}
+.who-card:hover{transform:translateY(-5px);box-shadow:0 24px 48px rgba(0,0,0,.35)}
+.wc-icon{font-size:30px;margin-bottom:16px}
+.wc-title{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--txt);margin-bottom:10px}
+.wc-desc{font-size:14px;color:var(--txt2);line-height:1.65;margin-bottom:20px;font-weight:300}
+.wc-quote{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--txt3);font-style:italic;padding-top:16px;border-top:1px solid var(--bdr);line-height:1.55}
+
+/* ─── PRICING ─── */
+.price-sec{background:var(--surface)}
+.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:60px}
+.price-card{background:var(--bg);border:1px solid var(--bdr);border-radius:10px;padding:36px;position:relative;transition:all .25s}
+.price-card:hover{border-color:rgba(240,180,41,.2);transform:translateY(-4px)}
+.price-card.feat{border-color:rgba(240,180,41,.35);background:var(--surface-r);box-shadow:0 0 48px rgba(240,180,41,.08)}
+.p-badge{position:absolute;top:-1px;left:24px;background:var(--amber);color:#080D1A;font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;padding:3px 12px;border-radius:0 0 5px 5px;letter-spacing:.1em}
+.p-tier{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--txt3);letter-spacing:.1em;margin-bottom:16px}
+.p-price{font-family:'JetBrains Mono',monospace;margin-bottom:4px}
+.p-amt{font-size:36px;font-weight:300;color:var(--txt)}
+.p-per{font-size:13px;color:var(--txt3)}
+.p-desc{font-size:13px;color:var(--txt3);margin-bottom:28px;line-height:1.5}
+.p-div{height:1px;background:var(--bdr);margin-bottom:20px}
+.p-feats{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.p-feats li{font-size:13px;color:var(--txt2);display:flex;align-items:flex-start;gap:9px}
+.p-feats li::before{content:'✓';color:var(--teal);font-size:11px;flex-shrink:0;margin-top:2px}
+.p-cta{display:block;width:100%;padding:12px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;text-align:center;cursor:pointer;text-decoration:none;transition:all .2s;border:none}
+.p-cta-a{background:var(--amber);color:#080D1A;box-shadow:0 0 24px rgba(240,180,41,.22)}
+.p-cta-a:hover{box-shadow:0 0 40px rgba(240,180,41,.4)}
+.p-cta-g{background:transparent;color:var(--txt2);border:1px solid var(--bdr)}
+.p-cta-g:hover{border-color:rgba(255,255,255,.15);color:var(--txt)}
+.price-note{text-align:center;margin-top:28px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--txt3)}
+
+/* ─── FAQ ─── */
+.faq-sec{background:var(--bg)}
+.faq-layout{display:grid;grid-template-columns:1fr 2fr;gap:80px;margin-top:60px;align-items:start}
+.faq-left p{font-size:14px;color:var(--txt2);line-height:1.7;font-weight:300}
+.faq-items{display:flex;flex-direction:column}
+.faq-item{border-bottom:1px solid var(--bdr)}
+.faq-q{width:100%;background:none;border:none;padding:20px 0;text-align:left;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--txt);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;transition:color .2s}
+.faq-q:hover{color:var(--amber)}
+.faq-icon{font-size:20px;color:var(--txt3);transition:all .25s;flex-shrink:0;font-weight:300}
+.faq-item.open .faq-icon{transform:rotate(45deg);color:var(--amber)}
+.faq-ans{font-size:14px;color:var(--txt2);line-height:1.75;font-weight:300;max-height:0;overflow:hidden;transition:max-height .35s ease,padding-bottom .2s;padding-bottom:0}
+.faq-item.open .faq-ans{max-height:260px;padding-bottom:20px}
+
+/* ─── FOOTER ─── */
+footer{background:var(--surface);border-top:1px solid var(--bdr);padding:64px 52px 36px}
+.foot-in{max-width:1280px;margin:0 auto}
+.foot-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:48px}
+.foot-brand p{font-size:14px;color:var(--txt3);line-height:1.65;margin-top:12px;font-weight:300;max-width:280px}
+.foot-col-lbl{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--txt3);letter-spacing:.13em;text-transform:uppercase;margin-bottom:16px}
+.foot-links{list-style:none;display:flex;flex-direction:column;gap:10px}
+.foot-links a{font-size:13.5px;color:var(--txt2);text-decoration:none;transition:color .2s}
+.foot-links a:hover{color:var(--amber)}
+.foot-bot{display:flex;justify-content:space-between;align-items:center;padding-top:24px;border-top:1px solid var(--bdr)}
+.foot-copy{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--txt3)}
+.foot-founder{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--txt3)}
+.foot-founder span{color:var(--amber)}
+
+/* ─── FLOATING CTA ─── */
+.float-cta{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--surface-r);border:1px solid var(--bdr-a);border-radius:40px;padding:13px 22px;display:flex;align-items:center;gap:20px;box-shadow:0 20px 60px rgba(0,0,0,.5);transition:transform .45s cubic-bezier(.34,1.56,.64,1);z-index:50}
+.float-cta.vis{transform:translateX(-50%) translateY(0)}
+.float-cta p{font-size:13px;color:var(--txt2);white-space:nowrap}
+
+/* ─── SCROLL REVEAL ─── */
+.reveal{opacity:0;transform:translateY(20px);transition:all .65s ease}
+.reveal.vis{opacity:1;transform:translateY(0)}
+
+/* ─── NOISE OVERLAY ─── */
+.noise{position:fixed;inset:0;pointer-events:none;z-index:300;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+</style>
+</head>
+<body>
+
+<!-- Noise texture overlay -->
+<div class="noise"></div>
+
+<!-- ─── NAV ─── -->
+<nav id="nav">
+  <a href="#" class="logo">Koriv<span class="logo-pulse"></span></a>
+  <ul class="nav-links">
+    <li><a href="#product">Product</a></li>
+    <li><a href="#coverage">Coverage</a></li>
+    <li><a href="#who">Who It's For</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+  </ul>
+  <div class="nav-r">
+    <a href="#" class="nav-login">Log In</a>
+    <a href="#demo" class="btn-a">Request Demo</a>
+  </div>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section class="hero" id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-trefoil">☢</div>
+  <div class="hero-radial"></div>
+  <div class="pulse-wrap">
+    <div class="p-ring"></div>
+    <div class="p-ring"></div>
+    <div class="p-ring"></div>
+  </div>
+
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-eyebrow">
+        <span class="ey-dot"></span>
+        <span>For Radiation Safety Officers</span>
+      </div>
+      <h1>The compliance work<br>your team does by hand —<br><em>done in seconds.</em></h1>
+      <p class="hero-sub">Koriv pulls your dosimeter data, tracks every worker's cumulative exposure, reads new AERB and NRC circulars, and generates submission-ready reports — automatically.</p>
+      <div class="hero-ctas">
+        <a href="#demo" class="btn-hero">See a 3-minute demo →</a>
+        <a href="#product" class="btn-ghost">How it works</a>
+      </div>
+      <div class="hero-trust">
+        <div class="t-item"><span class="t-check">✓</span> AERB compliant output</div>
+        <div class="t-item"><span class="t-check">✓</span> No IT setup required</div>
+        <div class="t-item"><span class="t-check">✓</span> RSO-approved workflow</div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <!-- Dosimeter widget -->
+      <div class="dosi-widget">
+        <div class="w-lbl">Ambient Dose Equivalent</div>
+        <div class="w-div"></div>
+        <div class="dose-row">
+          <span id="dose-val">0.21</span>
+          <span class="dose-unit">μSv/h</span>
+        </div>
+        <div class="dose-status">
+          <span class="s-blink"></span>WITHIN SAFE LIMITS
+        </div>
+        <div class="dose-bar-wrap">
+          <div class="dose-bar-lbls"><span>Annual exposure</span><span>18% of limit</span></div>
+          <div class="dose-bar"><div class="dose-bar-fill" id="dose-bar-fill"></div></div>
+        </div>
+      </div>
+
+      <!-- Floating alert card -->
+      <div class="float-card">
+        <div class="fc-hdr">
+          <span class="fc-title">Pre-Audit Scan</span>
+          <span class="fc-badge">3 ISSUES FOUND</span>
+        </div>
+        <div class="fc-body">Worker RW-0088 at 90% of quarterly limit. Badge calibration overdue.</div>
+        <div class="fc-sub">→ Review now before July 14 inspection</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Waveform divider -->
+<div class="wave-div">
+  <svg viewBox="0 0 1440 32" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0,16 L30,16 L35,6 L40,26 L45,16 L80,16 L85,9 L90,23 L95,16 L130,16 L135,4 L140,28 L145,16 L180,16 L185,11 L190,21 L195,16 L240,16 L245,7 L250,25 L255,16 L290,16 L295,10 L300,22 L305,16 L350,16 L355,5 L360,27 L365,16 L400,16 L405,12 L410,20 L415,16 L460,16 L465,8 L470,24 L475,16 L510,16 L515,6 L520,26 L525,16 L570,16 L575,10 L580,22 L585,16 L620,16 L625,4 L630,28 L635,16 L680,16 L685,11 L690,21 L695,16 L730,16 L735,7 L740,25 L745,16 L790,16 L795,9 L800,23 L805,16 L840,16 L845,5 L850,27 L855,16 L900,16 L905,12 L910,20 L915,16 L950,16 L955,6 L960,26 L965,16 L1010,16 L1015,8 L1020,24 L1025,16 L1060,16 L1065,10 L1070,22 L1075,16 L1120,16 L1125,4 L1130,28 L1135,16 L1170,16 L1175,11 L1180,21 L1185,16 L1230,16 L1235,7 L1240,25 L1245,16 L1280,16 L1285,9 L1290,23 L1295,16 L1340,16 L1345,5 L1350,27 L1355,16 L1440,16"
+      stroke="rgba(240,180,41,0.6)" stroke-width="1" fill="none"/>
+  </svg>
+</div>
+
+<!-- ─── SOCIAL PROOF ─── -->
+<div class="sp-bar">
+  <div class="sp-inner">
+    <span class="sp-label">TRUSTED BY RSOs AT</span>
+    <div class="sp-items">
+      <div class="sp-item"><span class="sp-icon">🏥</span>Private Hospitals</div>
+      <div class="sp-item"><span class="sp-icon">🔬</span>Nuclear Medicine Depts</div>
+      <div class="sp-item"><span class="sp-icon">⚙️</span>Industrial NDT Companies</div>
+      <div class="sp-item"><span class="sp-icon">🧪</span>Research Reactors</div>
+      <div class="sp-item"><span class="sp-icon">🏗️</span>Pipeline Inspection Firms</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── PROBLEM ─── -->
+<section class="prob-sec" id="problem">
+  <div class="sec-in">
+    <div class="reveal">
+      <div class="eyebrow">The Problem</div>
+      <h2 class="s-head">This is what RSOs actually deal with.</h2>
+      <p class="s-sub">Every one of these happened because the data existed — but nobody caught it in time.</p>
+    </div>
+    <div class="inc-cards">
+      <div class="inc-card" data-delay="0">
+        <div class="inc-hdr">
+          <span class="inc-type">Compliance Incident · Type 1</span>
+          <span class="inc-stamp stamp-r">MISSED</span>
+        </div>
+        <div class="inc-title">The Threshold Miss</div>
+        <div class="inc-desc">Worker RW-0088 exceeded their quarterly dose threshold by 11% before anyone was alerted. Manual log review was happening weekly — not daily.</div>
+        <div class="inc-out"><strong>Outcome:</strong> Show-cause notice. 3-week facility review halted operations.</div>
+      </div>
+      <div class="inc-card" data-delay="120">
+        <div class="inc-hdr">
+          <span class="inc-type">Compliance Incident · Type 2</span>
+          <span class="inc-stamp stamp-a">OVERDUE</span>
+        </div>
+        <div class="inc-title">The Report Sprint</div>
+        <div class="inc-desc">Three weeks before a AERB site inspection, the RSO manually compiled 18 months of dosimeter logs, calibration records, and bioassay forms across 6 spreadsheets.</div>
+        <div class="inc-out"><strong>Outcome:</strong> 160+ hours of RSO time. 4 errors found by the inspector on-site.</div>
+      </div>
+      <div class="inc-card" data-delay="240">
+        <div class="inc-hdr">
+          <span class="inc-type">Compliance Incident · Type 3</span>
+          <span class="inc-stamp stamp-t">FLAGGED</span>
+        </div>
+        <div class="inc-title">The Outdated SOP</div>
+        <div class="inc-desc">The facility's written radiation protection program referenced AERB Circular No. 06/2019 — superseded two years earlier. Nobody had tracked the regulatory update.</div>
+        <div class="inc-out"><strong>Outcome:</strong> Corrective action order. SOP rewrite required within 30 days.</div>
+      </div>
+    </div>
+    <div class="prob-close">None of these had to happen. <em>They all had a fix that existed in the data.</em></div>
+  </div>
+</section>
+
+<!-- Waveform -->
+<div class="wave-div">
+  <svg viewBox="0 0 1440 32" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0,16 L40,16 L45,8 L50,24 L55,16 L90,16 L95,5 L100,27 L105,16 L150,16 L155,11 L160,21 L165,16 L200,16 L205,7 L210,25 L215,16 L260,16 L265,9 L270,23 L275,16 L310,16 L315,4 L320,28 L325,16 L370,16 L375,12 L380,20 L385,16 L420,16 L425,6 L430,26 L435,16 L480,16 L485,10 L490,22 L495,16 L530,16 L535,5 L540,27 L545,16 L590,16 L595,8 L600,24 L605,16 L650,16 L655,11 L660,21 L665,16 L700,16 L705,7 L710,25 L715,16 L760,16 L765,9 L770,23 L775,16 L810,16 L815,4 L820,28 L825,16 L870,16 L875,12 L880,20 L885,16 L920,16 L925,6 L930,26 L935,16 L980,16 L985,10 L990,22 L995,16 L1030,16 L1035,5 L1040,27 L1045,16 L1090,16 L1095,8 L1100,24 L1105,16 L1150,16 L1155,11 L1160,21 L1165,16 L1200,16 L1205,7 L1210,25 L1215,16 L1260,16 L1265,9 L1270,23 L1275,16 L1310,16 L1315,4 L1320,28 L1325,16 L1370,16 L1375,12 L1380,20 L1385,16 L1440,16"
+      stroke="rgba(0,212,184,0.4)" stroke-width="1" fill="none"/>
+  </svg>
+</div>
+
+<!-- ─── PRODUCT ─── -->
+<section class="prod-sec" id="product">
+  <div class="sec-in">
+    <div class="reveal">
+      <div class="eyebrow">The Product</div>
+      <h2 class="s-head">Open Koriv. See everything<br>your compliance program is missing.</h2>
+    </div>
+    <div class="tab-nav" style="margin-top:40px">
+      <button class="tab-btn active" onclick="switchTab(0)">Dose Monitoring</button>
+      <button class="tab-btn" onclick="switchTab(1)">Auto-Reporting</button>
+      <button class="tab-btn" onclick="switchTab(2)">Audit Prep</button>
+    </div>
+
+    <!-- Tab 0: Dose Monitoring -->
+    <div class="tab-panel active" id="tab0">
+      <div class="tab-info">
+        <h3>Every worker. Every reading. Zero surprises.</h3>
+        <p>Koriv pulls directly from your TLD or OSL badge provider's data feed. It tracks cumulative exposure in real time, flags workers approaching quarterly or annual limits, and catches missed calibration windows before they become a finding.</p>
+        <ul class="tab-feats">
+          <li>Real-time feed from dosimeter provider API — no manual export</li>
+          <li>Individual and collective dose tracking across all worker IDs</li>
+          <li>Automatic alert when a worker crosses 80% of any regulatory limit</li>
+          <li>Badge calibration schedule tracking with overdue flags</li>
+          <li>Historical exposure trend for each worker, exportable on demand</li>
+        </ul>
+      </div>
+      <div class="mock">
+        <div class="mock-bar">
+          <div class="m-dot"></div><div class="m-dot"></div><div class="m-dot"></div>
+          <span class="m-t">koriv · worker exposure monitor · Q2 2026</span>
+        </div>
+        <div class="mock-body">
+          <div class="mk-thead"><span>Worker</span><span>Dose (mSv/yr)</span><span>% of Limit</span><span>Status</span></div>
+          <div class="w-row ww">
+            <div><div class="wn">Priya Nair</div><div class="wid">RW-0088</div></div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber)">18.1</div>
+            <div class="bar-wrap"><div class="mini-bar"><div class="mini-fill bf-a" style="width:90%"></div></div><span class="wpct">90%</span></div>
+            <div class="sdot sd-a"></div>
+          </div>
+          <div class="w-row" style="border-left-color:transparent">
+            <div><div class="wn">Raj Mehta</div><div class="wid">RW-0041</div></div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt)">12.4</div>
+            <div class="bar-wrap"><div class="mini-bar"><div class="mini-fill bf-t" style="width:62%"></div></div><span class="wpct">62%</span></div>
+            <div class="sdot sd-t"></div>
+          </div>
+          <div class="w-row wd">
+            <div><div class="wn">Amit Shah</div><div class="wid">RW-0023</div></div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt)">4.2</div>
+            <div class="bar-wrap"><div class="mini-bar"><div class="mini-fill bf-t" style="width:21%"></div></div><span class="wpct">21%</span></div>
+            <div class="sdot sd-t"></div>
+          </div>
+          <div class="w-row" style="border-left-color:transparent">
+            <div><div class="wn">Kavita Rao</div><div class="wid">RW-0057</div></div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt)">8.9</div>
+            <div class="bar-wrap"><div class="mini-bar"><div class="mini-fill bf-t" style="width:44%"></div></div><span class="wpct">44%</span></div>
+            <div class="sdot sd-t"></div>
+          </div>
+          <div style="margin-top:12px;padding:8px 10px;background:rgba(240,180,41,0.07);border:1px solid rgba(240,180,41,0.2);border-radius:4px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--amber)">⚠ RW-0088 · Badge calibration overdue by 4 days. Last calibrated: Feb 12.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 1: Auto-Reporting -->
+    <div class="tab-panel" id="tab1">
+      <div class="tab-info">
+        <h3>One click. A regulator-ready report.</h3>
+        <p>Select your facility type, your reporting period, and the regulatory framework. Koriv assembles a submission-ready document — pre-formatted with the exact tables, worker IDs, exposure data, and calibration records your inspector expects.</p>
+        <ul class="tab-feats">
+          <li>AERB Form 2, NRC Annual Report, and IAEA-format outputs</li>
+          <li>All data sourced directly from verified dosimeter feeds</li>
+          <li>Document generated in under 60 seconds, no manual review needed</li>
+          <li>Audit trail attached: every figure is traceable to its source record</li>
+          <li>Export as PDF or structured XML for direct regulatory upload</li>
+        </ul>
+      </div>
+      <div class="mock" id="rpt-mock">
+        <div class="mock-bar">
+          <div class="m-dot"></div><div class="m-dot"></div><div class="m-dot"></div>
+          <span class="m-t">koriv · report generator · AERB Form 2</span>
+        </div>
+        <div class="rpt-body">
+          <div class="rpt-lbl" id="rpt-status-lbl">Generating AERB Form 2 · Q2 2026...</div>
+          <div class="rpt-outer"><div id="rpt-bar-fill"></div></div>
+          <div class="rpt-preview">
+            <div class="rpt-hdr">AERB RADIATION SAFETY REPORT · FORM 2 · PERIOD: APR–JUN 2026</div>
+            <div class="rpt-row"><div class="rpt-cell rpt-w"></div></div>
+            <div class="rpt-row"><div class="rpt-cell"></div><div class="rpt-cell"></div></div>
+            <div class="rpt-row"><div class="rpt-cell rpt-w"></div></div>
+            <div class="rpt-row"><div class="rpt-cell"></div><div class="rpt-cell"></div></div>
+            <div class="rpt-row"><div class="rpt-cell rpt-w"></div></div>
+            <div class="rpt-row"><div class="rpt-cell"></div><div class="rpt-cell"></div></div>
+            <div class="rpt-ts" id="rpt-ts" style="display:none">✓ Generated in 38 seconds · Ready to download</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Audit Prep -->
+    <div class="tab-panel" id="tab2">
+      <div class="tab-info">
+        <h3>Know exactly where you stand before the inspector arrives.</h3>
+        <p>Tell Koriv your facility type and inspection date. It cross-references your entire compliance record against the current regulatory checklist for that exact inspection type — and surfaces every gap with a fix.</p>
+        <ul class="tab-feats">
+          <li>Inspection-specific checklists for AERB, NRC, and IAEA audits</li>
+          <li>Cross-references live data against current regulatory requirements</li>
+          <li>Priority-ranked gap list with corrective action recommendations</li>
+          <li>SOP version checker — flags outdated circular references automatically</li>
+          <li>Shareable pre-audit summary for facility management review</li>
+        </ul>
+      </div>
+      <div class="mock">
+        <div class="mock-bar">
+          <div class="m-dot"></div><div class="m-dot"></div><div class="m-dot"></div>
+          <span class="m-t">koriv · audit prep · quick scan</span>
+        </div>
+        <div class="audit-body">
+          <div class="audit-typerow"><span class="audit-lbl2">Facility</span><span class="audit-val">Hospital · Radiology + Nuclear Medicine</span></div>
+          <div class="audit-typerow"><span class="audit-lbl2">Inspection</span><span class="audit-val">AERB Site Inspection</span></div>
+          <div class="audit-typerow"><span class="audit-lbl2">Date</span><span class="audit-val">July 14, 2026 · 43 days away</span></div>
+          <div class="audit-div"></div>
+          <div class="audit-log" id="audit-log">
+            <div class="a-line" id="al0"><span class="a-chk">Checking dosimeter calibration records...</span></div>
+            <div class="a-line" id="al1"><span class="a-chk">Checking worker exposure logs (Q1, Q2)...</span></div>
+            <div class="a-line" id="al2"><span class="a-chk">Checking radiation protection program...</span></div>
+            <div class="a-line" id="al3"><span class="a-chk">Checking bioassay records (monthly)...</span></div>
+            <div class="a-line" id="al4"><span class="a-chk">Checking equipment leak test log...</span></div>
+          </div>
+          <div class="audit-result-box" id="audit-result">
+            <div class="arb-hdr"><span>KORIV AUDIT SCAN</span><span style="color:var(--danger)">2 ISSUES FOUND</span></div>
+            <div class="arb-item"><strong>⚠ Protection program references superseded circular</strong>AERB Circular No. 06/2019 replaced by No. 04/2023. SOP update required before inspection.</div>
+            <div class="arb-item"><strong>⚠ Bioassay records — April gap</strong>3 workers missing April 2026 monthly bioassay. Collection deadline: July 3.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── HOW IT WORKS ─── -->
+<section class="hiw-sec" id="how">
+  <div class="sec-in">
+    <div class="reveal">
+      <div class="eyebrow">How It Works</div>
+      <h2 class="s-head">Three connections. One system.<br>Zero manual work.</h2>
+    </div>
+    <div class="hiw-steps">
+      <div class="hiw-line"></div>
+      <div class="hiw-step reveal">
+        <div class="hiw-num-wrap"><div class="hiw-circle">01</div></div>
+        <div class="hiw-title">Connect your dosimeter provider</div>
+        <div class="hiw-desc">Koriv connects directly to your TLD or OSL badge provider's data feed. No exports, no spreadsheets. Setup takes under 10 minutes. Your dosimeter company likely already has an integration.</div>
+      </div>
+      <div class="hiw-step reveal" style="transition-delay:.15s">
+        <div class="hiw-num-wrap"><div class="hiw-circle">02</div></div>
+        <div class="hiw-title">Koriv reads the regulations for you</div>
+        <div class="hiw-desc">It monitors AERB, NRC, and IAEA bulletins continuously. When a new circular is issued, Koriv maps it to your specific facility class and flags exactly what you need to act on.</div>
+      </div>
+      <div class="hiw-step reveal" style="transition-delay:.3s">
+        <div class="hiw-num-wrap"><div class="hiw-circle">03</div></div>
+        <div class="hiw-title">You get outputs, not tasks</div>
+        <div class="hiw-desc">Compliance reports, worker alerts, audit checklists, SOP update flags — pre-built and ready. Everything your regulator expects, without the 40 hours of manual work per quarter.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── WOW MOMENT ─── -->
+<section class="wow-sec" id="demo">
+  <div class="wow-glow"></div>
+  <div class="sec-in">
+    <div class="wow-in">
+      <div class="eyebrow" style="text-align:center">The Demo Moment</div>
+      <h2 class="wow-q">"Wait — it found that <em>in 40 seconds?</em>"</h2>
+
+      <div class="terminal">
+        <div class="t-bar">
+          <div class="m-dot"></div><div class="m-dot"></div><div class="m-dot"></div>
+          <span class="t-bar-title">KORIV · PRE-AUDIT SCAN · LIVE</span>
+        </div>
+        <div class="t-body">
+          <div class="t-input-section">
+            <div class="t-row"><span class="t-lbl">Facility type</span><span class="t-val">Hospital · Radiology + Nuclear Medicine</span></div>
+            <div class="t-row"><span class="t-lbl">Inspection type</span><span class="t-val">AERB Site Inspection</span></div>
+            <div class="t-row"><span class="t-lbl">Inspection date</span><span class="t-val">July 14, 2026</span></div>
+          </div>
+          <div class="t-div"></div>
+          <div class="scan-log">
+            <div class="sl" id="sl0"><span class="sl-chk">Checking dosimeter calibration records...</span></div>
+            <div class="sl" id="sl1"><span class="sl-chk">Checking worker exposure logs (Q1, Q2 2026)...</span></div>
+            <div class="sl" id="sl2"><span class="sl-chk">Checking written radiation protection program...</span></div>
+            <div class="sl" id="sl3"><span class="sl-chk">Checking bioassay records (monthly cadence)...</span></div>
+            <div class="sl" id="sl4"><span class="sl-chk">Checking equipment leak test log...</span></div>
+            <div class="sl" id="sl5"><span class="sl-chk">Checking Form 2 submission history...</span></div>
+          </div>
+          <div class="scan-results" id="scan-results">
+            <div class="sr-hdr"><span>KORIV PRE-AUDIT SCAN — COMPLETE</span><span style="color:var(--danger)">3 ISSUES FOUND</span></div>
+            <div class="sr-item">
+              <span class="sri-icon">⚠</span>
+              <span class="sri-txt"><strong>Written protection program references superseded circular</strong>AERB Circular No. 06/2019 replaced by No. 04/2023. Update the SOP language before July 14.</span>
+            </div>
+            <div class="sr-item">
+              <span class="sri-icon">⚠</span>
+              <span class="sri-txt"><strong>Bioassay records missing — April 2026 (3 workers)</strong>Collection must be completed before July 3. Workers: RW-0088, RW-0041, RW-0102.</span>
+            </div>
+            <div class="sr-item">
+              <span class="sri-icon">⚠</span>
+              <span class="sri-txt"><strong>Form 2 submission for Q1 2026 not filed</strong>Deadline was April 30. File immediately with a covering note explaining the delay.</span>
+            </div>
+          </div>
+          <div class="scan-btn-wrap">
+            <button class="scan-btn" id="scan-btn" onclick="runScan()">▶ Run Pre-Audit Scan</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="wow-test">
+        <p>"We had an inspection in six weeks. This surfaced what our team would have missed in three weeks of manual prep — in 40 seconds."</p>
+        <cite>— Radiation Safety Officer, 400-bed private hospital, Mumbai</cite>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── REGULATORY COVERAGE ─── -->
+<section class="reg-sec" id="coverage">
+  <div class="sec-in">
+    <div class="reveal">
+      <div class="eyebrow">Regulatory Coverage</div>
+      <h2 class="s-head">Koriv knows the rulebook.<br>Every page of it.</h2>
+      <p class="s-sub">Every new circular, bulletin, and safety guide is tracked the day it's issued and mapped to your facility class automatically.</p>
+    </div>
+    <div class="reg-badges">
+      <div class="reg-badge"><span class="rb-name">AERB</span><span class="rb-full">Atomic Energy Regulatory Board</span><div class="rb-tip"><span>62 active circulars tracked · Updated 2 days ago</span></div></div>
+      <div class="reg-badge"><span class="rb-name">NRC</span><span class="rb-full">Nuclear Regulatory Commission (US)</span><div class="rb-tip"><span>91 active bulletins tracked · Updated daily</span></div></div>
+      <div class="reg-badge"><span class="rb-name">IAEA</span><span class="rb-full">International Atomic Energy Agency</span><div class="rb-tip"><span>34 safety guides tracked · GSR Part 3 aligned</span></div></div>
+      <div class="reg-badge"><span class="rb-name">BARC</span><span class="rb-full">Bhabha Atomic Research Centre</span><div class="rb-tip"><span>BARC Safety Guidelines · All categories</span></div></div>
+      <div class="reg-badge"><span class="rb-name">EURATOM</span><span class="rb-full">European Atomic Energy Community</span><div class="rb-tip"><span>BSS Directive 2013/59 · Fully mapped</span></div></div>
+    </div>
+    <div class="reg-layout">
+      <div>
+        <p style="font-size:14px;color:var(--txt2);margin-bottom:20px;font-weight:300">Regulation types Koriv tracks and enforces across all frameworks:</p>
+        <ul class="reg-types">
+          <li><span class="rti">📊</span>Occupational dose limits and action levels</li>
+          <li><span class="rti">🔧</span>Equipment calibration schedules and intervals</li>
+          <li><span class="rti">🧬</span>Bioassay requirements by worker category</li>
+          <li><span class="rti">📄</span>SOP version mandates and circular updates</li>
+          <li><span class="rti">⏰</span>Incident reporting deadlines and formats</li>
+          <li><span class="rti">🏛️</span>Form submission calendars by facility type</li>
+        </ul>
+      </div>
+      <div class="reg-feed reveal">
+        <div class="rf-lbl"><span class="feed-dot"></span>LIVE REGULATORY FEED</div>
+        <div class="rf-items">
+          <div class="rf-item"><strong>AERB Circular 02/2026</strong>Revised shielding design guidelines for PET-CT and hybrid imaging suites. Effective immediately for new installations.</div>
+          <div class="rf-item"><strong>NRC Information Notice 2026-04</strong>Updated occupational dose monitoring requirements for Category B workers. Review required by Aug 1.</div>
+          <div class="rf-item"><strong>IAEA Safety Guide RS-G-1.3 Rev.2</strong>Occupational radiation protection framework revision under public comment. Monitoring active.</div>
+          <div class="rf-item"><strong>AERB Technical Specification TS-R-2 Update</strong>Revised calibration interval requirements for ionisation chambers. 6-month transition period.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── ROI ─── -->
+<section class="roi-sec">
+  <div class="sec-in">
+    <div class="roi-grid">
+      <div class="roi-item reveal">
+        <span class="roi-num" data-target="47" data-suffix="">0</span>
+        <span class="roi-lbl">hours saved by the average RSO<br>per month using Koriv</span>
+      </div>
+      <div class="roi-item reveal" style="transition-delay:.1s">
+        <span class="roi-num" data-target="38" data-suffix="s">&lt;40s</span>
+        <span class="roi-lbl">to generate a full<br>AERB compliance report</span>
+      </div>
+      <div class="roi-item reveal" style="transition-delay:.2s">
+        <span class="roi-num" data-target="3" data-suffix="×">0</span>
+        <span class="roi-lbl">faster pre-audit preparation<br>vs. manual process</span>
+      </div>
+      <div class="roi-item reveal" style="transition-delay:.3s">
+        <span class="roi-num" data-target="0" data-suffix="">0</span>
+        <span class="roi-lbl">compliance gaps missed<br>since deployment</span>
+      </div>
+    </div>
+    <div class="roi-foot">These numbers come from RSOs who were doing all of this by hand before Koriv.</div>
+  </div>
+</section>
+
+<!-- ─── WHO IT'S FOR ─── -->
+<section class="who-sec" id="who">
+  <div class="sec-in">
+    <div class="reveal">
+      <div class="eyebrow">Who It's For</div>
+      <h2 class="s-head">Built for the person<br>everyone ignores until audit day.</h2>
+    </div>
+    <div class="who-cards">
+      <div class="who-card reveal">
+        <div class="wc-icon">🏥</div>
+        <div class="wc-title">Hospital Radiation Departments</div>
+        <div class="wc-desc">200–600 bed private hospitals with radiology, nuclear medicine, or radiation oncology. 30–60 radiation workers. One RSO managing everything alone, across multiple departments with different exposure profiles.</div>
+        <div class="wc-quote">"I used to dread audit season. Now I run the scan and I know exactly where we stand three months out."</div>
+      </div>
+      <div class="who-card reveal" style="transition-delay:.12s">
+        <div class="wc-icon">⚙️</div>
+        <div class="wc-title">Industrial Radiography Firms</div>
+        <div class="wc-desc">Pipeline inspection, NDT contractors, construction firms with field-based radiation workers across 5–15 sites simultaneously. The RSO has zero real-time visibility into what a worker's cumulative dose is on Site 7 today.</div>
+        <div class="wc-quote">"We had workers at four sites. I couldn't tell you in real time who was close to threshold. Now I can."</div>
+      </div>
+      <div class="who-card reveal" style="transition-delay:.24s">
+        <div class="wc-icon">🔬</div>
+        <div class="wc-title">Research & Academic Facilities</div>
+        <div class="wc-desc">Universities, DRDO labs, research reactors. Complex and multi-jurisdictional compliance requirements, limited administrative support, and high regulatory scrutiny. The RSO is usually also a researcher with a full-time job.</div>
+        <div class="wc-quote">"I'm a physicist, not a compliance officer. Koriv handles the admin. I handle the science."</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PRICING ─── -->
+<section class="price-sec" id="pricing">
+  <div class="sec-in">
+    <div class="reveal" style="text-align:center">
+      <div class="eyebrow">Pricing</div>
+      <h2 class="s-head">Priced for compliance teams,<br>not enterprise software budgets.</h2>
+      <p class="s-sub" style="margin:0 auto">30-day free pilot. No credit card. Setup in under a day.</p>
+    </div>
+    <div class="price-grid">
+      <div class="price-card reveal">
+        <div class="p-tier">STARTER</div>
+        <div class="p-price"><span class="p-amt">₹18,000</span><span class="p-per">/month</span></div>
+        <div class="p-desc">Single facility. Up to 50 radiation workers. Core compliance automation.</div>
+        <div class="p-div"></div>
+        <ul class="p-feats">
+          <li>Real-time dose monitoring for up to 50 workers</li>
+          <li>Automated exposure alerts and threshold notifications</li>
+          <li>AERB Form 2 report generation</li>
+          <li>Badge calibration schedule tracking</li>
+          <li>Email support with 24hr response</li>
+        </ul>
+        <a href="#" class="p-cta p-cta-g">Start Free Trial</a>
+      </div>
+      <div class="price-card feat reveal" style="transition-delay:.12s">
+        <div class="p-badge">MOST POPULAR</div>
+        <div class="p-tier">PROFESSIONAL</div>
+        <div class="p-price"><span class="p-amt">₹42,000</span><span class="p-per">/month</span></div>
+        <div class="p-desc">Multi-facility operations. Full regulatory coverage. Pre-audit intelligence.</div>
+        <div class="p-div"></div>
+        <ul class="p-feats">
+          <li>Up to 200 workers across multiple facilities</li>
+          <li>Full regulatory coverage: AERB + NRC + IAEA</li>
+          <li>Pre-audit scan with prioritised gap reporting</li>
+          <li>Unlimited report generation in all formats</li>
+          <li>SOP version checker and circular tracking</li>
+          <li>Priority support with 4hr response SLA</li>
+        </ul>
+        <a href="#" class="p-cta p-cta-a">Start Free Trial</a>
+      </div>
+      <div class="price-card reveal" style="transition-delay:.24s">
+        <div class="p-tier">ENTERPRISE</div>
+        <div class="p-price"><span class="p-amt">Custom</span></div>
+        <div class="p-desc">Unlimited scale. API access. Dedicated onboarding and compliance support.</div>
+        <div class="p-div"></div>
+        <ul class="p-feats">
+          <li>Unlimited workers and facility sites</li>
+          <li>API access for ERP / HRMS integration</li>
+          <li>Custom regulatory framework configuration</li>
+          <li>Dedicated compliance specialist onboarding</li>
+          <li>SLA guarantee with 99.9% uptime</li>
+          <li>On-site implementation support available</li>
+        </ul>
+        <a href="#" class="p-cta p-cta-g">Talk to Us</a>
+      </div>
+    </div>
+    <div class="price-note">All plans include a 30-day free pilot · No credit card required · Cancel anytime</div>
+  </div>
+</section>
+
+<!-- ─── FAQ ─── -->
+<section class="faq-sec" id="faq">
+  <div class="sec-in">
+    <div class="faq-layout">
+      <div class="faq-left reveal">
+        <div class="eyebrow">FAQ</div>
+        <h2 class="s-head" style="font-size:32px;margin-bottom:16px">Questions RSOs actually ask.</h2>
+        <p>These come from real conversations with radiation safety officers — not marketing copy. If you have one we haven't answered, email us at <span style="color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:13px">hello@koriv.ai</span></p>
+      </div>
+      <div class="faq-items reveal" style="transition-delay:.1s">
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Does Koriv work with our existing dosimeter badge provider?<span class="faq-icon">+</span></button>
+          <div class="faq-ans">Koriv integrates with all major TLD and OSL badge providers operating in India and Southeast Asia — including Nucleonix, Radiation Safety Systems, and most hospital-affiliated dosimetry labs. If your provider offers a data export or API, setup typically takes under a day. For providers without APIs, we handle the integration setup for you as part of onboarding.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Is worker dosimetry data stored securely?<span class="faq-icon">+</span></button>
+          <div class="faq-ans">All data is encrypted at rest and in transit using AES-256 and TLS 1.3. Worker PII is stored in India on ISO 27001-compliant infrastructure. You retain full ownership of all data, and it is never used to train models or shared with third parties. Enterprise customers can opt for on-premise deployment.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">How does Koriv stay current when AERB issues new circulars?<span class="faq-icon">+</span></button>
+          <div class="faq-ans">Our regulatory monitoring system tracks AERB, NRC, IAEA, and BARC publication feeds daily. When a new circular or bulletin is issued, our team reviews it within 24 hours, maps it to affected facility classes, and pushes the update to Koriv's compliance engine. You're notified automatically with a summary of what changed and what action, if any, is required at your facility.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Can we use Koriv output directly in AERB submissions?<span class="faq-icon">+</span></button>
+          <div class="faq-ans">Yes. Koriv's reports are formatted to the exact specifications of AERB Form 2 and related submission formats. Every figure in the report is sourced from verified dosimeter data with an attached audit trail, which inspectors can trace back to the raw record. Multiple RSOs have submitted Koriv-generated reports without modification. That said, your RSO should always review the output before submission — Koriv is a tool, not a replacement for professional judgment.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">We have five sites. Can one RSO manage all of them from one dashboard?<span class="faq-icon">+</span></button>
+          <div class="faq-ans">That's exactly what the Professional and Enterprise plans are designed for. You get a unified dashboard across all sites, with site-level filtering and a company-wide exposure overview. Alerts are consolidated — you don't get five separate inboxes. The pre-audit scan can also be run across all sites simultaneously, giving you a single gap report covering your entire operation.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">What happens during a real audit — can Koriv support us during the inspection?<span class="faq-icon">+</span></button>
+          <div class="faq-ans">Koriv generates an inspector-ready document package before the audit: all dosimeter records, calibration logs, bioassay records, and compliance forms in one structured file. During the inspection itself, your RSO has access to the dashboard in real time to pull specific records on demand. Enterprise customers also have access to a dedicated compliance specialist who can be on a call during the inspection if needed.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <div class="foot-in">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <a href="#" class="logo" style="font-size:20px">Koriv<span class="logo-pulse"></span></a>
+        <p>AI-powered radiation compliance for RSOs who have enough to deal with. Built by people who've been inside compliance programs — not just read about them.</p>
+      </div>
+      <div>
+        <div class="foot-col-lbl">Product</div>
+        <ul class="foot-links">
+          <li><a href="#">Dose Monitoring</a></li>
+          <li><a href="#">Auto-Reporting</a></li>
+          <li><a href="#">Audit Prep</a></li>
+          <li><a href="#">Integrations</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="foot-col-lbl">Company</div>
+        <ul class="foot-links">
+          <li><a href="#">About</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="foot-col-lbl">Legal</div>
+        <ul class="foot-links">
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Data Security</a></li>
+          <li><a href="#">Compliance Docs</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bot">
+      <span class="foot-copy">© 2026 Koriv Technologies Pvt. Ltd. · hello@koriv.ai</span>
+      <span class="foot-founder">Founded by <span>Archit Shanbhag</span></span>
+    </div>
+  </div>
+</footer>
+
+<!-- ─── FLOATING CTA ─── -->
+<div class="float-cta" id="float-cta">
+  <p>See Koriv in action — 20 minutes, no commitment.</p>
+  <a href="#demo" class="btn-a" style="white-space:nowrap">Request Demo →</a>
+</div>
+
+<script>
+/* ── NAV SCROLL ── */
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 40);
+  // floating CTA
+  const fc = document.getElementById('float-cta');
+  fc.classList.toggle('vis', window.scrollY > 600);
+});
+
+/* ── DOSIMETER FLUCTUATION ── */
+let doseVal = 0.21;
+function fluctuate() {
+  const delta = (Math.random() - 0.48) * 0.035;
+  doseVal = Math.max(0.12, Math.min(0.38, doseVal + delta));
+  document.getElementById('dose-val').textContent = doseVal.toFixed(2);
+  // Update bar
+  const pct = ((doseVal - 0.12) / (0.38 - 0.12)) * 30 + 5;
+  // dosimeter bar stays fixed for annual exposure concept
+}
+setInterval(fluctuate, 2200);
+// start dose bar animation
+setTimeout(() => { document.getElementById('dose-bar-fill').style.width = '18%'; }, 500);
+
+/* ── SCROLL REVEAL ── */
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('vis'); revealObs.unobserve(e.target); } });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+/* ── INCIDENT CARDS ── */
+const cardObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const delay = parseInt(e.target.dataset.delay || 0);
+      setTimeout(() => {
+        e.target.classList.add('vis');
+        setTimeout(() => e.target.classList.add('stamped'), 500);
+      }, delay);
+      cardObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.2 });
+document.querySelectorAll('.inc-card').forEach(el => cardObs.observe(el));
+
+/* ── PRODUCT TABS ── */
+function switchTab(idx) {
+  document.querySelectorAll('.tab-panel').forEach((p, i) => {
+    p.classList.toggle('active', i === idx);
+  });
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === idx);
+  });
+  if (idx === 1) startReportAnim();
+  if (idx === 2) startAuditAnim();
+}
+
+/* Report animation */
+let rptDone = false;
+function startReportAnim() {
+  if (rptDone) return;
+  rptDone = true;
+  const fill = document.getElementById('rpt-bar-fill');
+  const lbl = document.getElementById('rpt-status-lbl');
+  const ts = document.getElementById('rpt-ts');
+  setTimeout(() => { fill.style.width = '100%'; }, 200);
+  setTimeout(() => { lbl.textContent = '✓ AERB Form 2 Generated · Q2 2026'; lbl.style.color = 'var(--success)'; ts.style.display = 'block'; }, 2400);
+}
+
+/* Audit tab animation */
+let auditDone = false;
+function startAuditAnim() {
+  if (auditDone) return;
+  auditDone = true;
+  const lines = [
+    { id: 'al0', ok: true, suffix: '✓ OK' },
+    { id: 'al1', ok: true, suffix: '✓ OK' },
+    { id: 'al2', ok: false, suffix: '⚠ ISSUE' },
+    { id: 'al3', ok: false, suffix: '⚠ GAP FOUND' },
+    { id: 'al4', ok: true, suffix: '✓ OK' },
+  ];
+  lines.forEach((l, i) => {
+    setTimeout(() => {
+      const el = document.getElementById(l.id);
+      el.classList.add('vis2');
+      const suffix = document.createElement('span');
+      suffix.className = l.ok ? 'a-ok' : 'a-warn';
+      suffix.textContent = l.suffix;
+      el.appendChild(suffix);
+      if (i === lines.length - 1) {
+        setTimeout(() => { document.getElementById('audit-result').classList.add('vis2'); }, 500);
+      }
+    }, 300 + i * 400);
+  });
+}
+
+/* ── WOW MOMENT SCAN ── */
+function runScan() {
+  const btn = document.getElementById('scan-btn');
+  btn.disabled = true;
+  btn.textContent = '⟳ Scanning...';
+
+  const lines = [
+    { id: 'sl0', ok: true },
+    { id: 'sl1', ok: true },
+    { id: 'sl2', ok: false },
+    { id: 'sl3', ok: false },
+    { id: 'sl4', ok: true },
+    { id: 'sl5', ok: false },
+  ];
+  const results = [
+    '✓ OK', '✓ OK', '⚠ ISSUE FOUND', '⚠ GAPS FOUND', '✓ OK', '⚠ OVERDUE'
+  ];
+
+  // Reset
+  lines.forEach(l => {
+    const el = document.getElementById(l.id);
+    el.classList.remove('sv');
+    while (el.children.length > 1) el.removeChild(el.lastChild);
+  });
+  document.getElementById('scan-results').classList.remove('sv');
+
+  lines.forEach((l, i) => {
+    setTimeout(() => {
+      const el = document.getElementById(l.id);
+      el.classList.add('sv');
+      setTimeout(() => {
+        const span = document.createElement('span');
+        span.className = l.ok ? 'sl-ok' : 'sl-w';
+        span.textContent = results[i];
+        el.appendChild(span);
+        if (i === lines.length - 1) {
+          setTimeout(() => {
+            document.getElementById('scan-results').classList.add('sv');
+            btn.textContent = '↺ Run Again';
+            btn.disabled = false;
+            btn.onclick = () => runScan();
+          }, 600);
+        }
+      }, 300);
+    }, 300 + i * 500);
+  });
+}
+
+/* ── ROI COUNT-UP ── */
+const roiObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    const el = e.target;
+    const target = parseInt(el.dataset.target);
+    const suffix = el.dataset.suffix || '';
+    if (target === 0 && suffix === '') { el.textContent = '0'; roiObs.unobserve(el); return; }
+    if (suffix === 's') { el.textContent = '<40s'; roiObs.unobserve(el); return; }
+    let current = 0;
+    const duration = 1800;
+    const start = performance.now();
+    function update(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      current = Math.round(eased * target);
+      el.textContent = current + suffix;
+      if (progress < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+    roiObs.unobserve(el);
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('.roi-num[data-target]').forEach(el => roiObs.observe(el));
+
+/* ── FAQ ACCORDION ── */
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+/* ── AUDIT TAB AUTO-START ON SCROLL ── */
+const auditObs = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting) {
+    if (document.getElementById('tab2').classList.contains('active')) startAuditAnim();
+    auditObs.disconnect();
+  }
+}, { threshold: 0.3 });
+auditObs.observe(document.getElementById('tab2'));
+
+/* ── SMOOTH LINK HANDLING ── */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+  });
+});
+</script>
+</body>
+</html>
